@@ -10,11 +10,16 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid" // CR(explodes): this package is imported as uuid already, alias isn't necessary
 )
+
+// CR(explodes): to generalize the DB code, maybe have it live in storage.go
+// users.go implies some kind of user model, which does exist here, but its only a couple lines
+// of the whole file
 
 // DB Base Functionality
 
+// CR(explodes): nit: in general, comments are a good thing
 type User struct {
 	ID        int       `json:"id"`
 	UserID    uuid.UUID `json:"user_id"`
@@ -23,7 +28,13 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// CR(explodes): this enforces that *DB is in fact a IdentityDatastore
+// useful to see plainly that DB does not implement IdentityDatastore as it is.
+var _ IdentityDatastore = (nil)(*DB)
+
 type IdentityDatastore interface {
+	// CR(explodes): if you don't want to export these interface
+	// methods, consider not exporting IdentityDatastore either
 	getUsers(start, count int) ([]*User, error)
 	createUser() error
 	readUser() error
@@ -35,6 +46,7 @@ type DB struct {
 	*sql.DB
 }
 
+// CR(explodes): maybe call this NewIdentityDatastore and return (IdentityDatastore, error)
 func InitDB(user, pass, dbname string) (*DB, error) {
 
 	connectionString :=
@@ -77,6 +89,8 @@ func (db *DB) readAllUsers(start, count int) ([]*User, error) {
 	return users, nil
 }
 
+// CR(explodes): consider accepting the required parameters to
+// to create a user and returning (id int, err error)
 func (db *DB) createUser(user *User) error {
 	err := db.QueryRow(
 		"INSERT INTO users(email) VALUES($1) RETURNING id",
@@ -111,6 +125,10 @@ func (db *DB) deleteUser(user *User) error {
 }
 
 // Routing Handlers
+
+// CR(explodes): was not expecting these handlers to be in the user file.
+// receiver methods generally should live in the same file as the type
+// declaration
 
 func (app *App) ReadAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 

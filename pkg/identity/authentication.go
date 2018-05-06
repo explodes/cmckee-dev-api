@@ -11,6 +11,7 @@ import (
 	githuboauth "golang.org/x/oauth2/github"
 )
 
+// CR(explodes): maybe have this be an env variable as well?
 var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 var oauthConf = &oauth2.Config{
@@ -21,6 +22,8 @@ var oauthConf = &oauth2.Config{
 }
 
 var oauthStateString = RandomString(16)
+
+// CR(explodes): app.go
 
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)

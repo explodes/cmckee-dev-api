@@ -22,6 +22,20 @@ func main() {
 
 	app := identity.App{db}
 
+	// CR(explodes): consider a method that builds a router
+	// func (a *App) CreateRouter() *mux.Router
+	// so that this file doesn't need to perform wiring, app can manage its own
+	// routing.
+	//
+	// side note: Another benefit to that is that you could use an interface:
+	// type RouterCreator interface {
+	// 		CreateRouter() *mux.Router
+	// }
+	// to compose several services together and serve them simultaneously, 
+	// importing re-usable RouterCreators like a system-health service.
+	//
+	// That ideology is way of scope for this project, but it is a very useful pattern.
+
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", app.HomeHandler)
@@ -40,5 +54,11 @@ func main() {
 	router.HandleFunc("/user/{id}", app.DeleteUserHandler).Methods("DELETE")
 
 	log.Println("Starting server...")
+	// CR(explodes): this pattern is often seen in the wild, and doesn't matter much here
+	// without SIGINT handling, but unless the program is killed, it could log nil.
+	// replace with:
+	// if err := http.ListenAndServe(":4545", router) {
+
+	}
 	log.Fatal(http.ListenAndServe(":4545", router))
 }

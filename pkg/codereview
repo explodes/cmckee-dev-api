@@ -1,0 +1,9 @@
+// CR(explodes): this pkg/identity why? 
+// i'd recommend renaming the repo to host.com/cmckee-dev/identity
+// with a folder structure like:
+// cmd/
+//   main.go
+// app.go
+// authentication.go
+// users.go
+// util.go
